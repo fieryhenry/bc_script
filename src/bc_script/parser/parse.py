@@ -64,13 +64,18 @@ def do(
 
 @dataclasses.dataclass
 class BaseParser:
-    dict_key: str
-    warn_on_not_found: bool = dataclasses.field(kw_only=True, default=False)
-    error_on_not_found: bool = dataclasses.field(kw_only=True, default=False)
+    dict_key: str = dataclasses.field(kw_only=True, default="", repr=False)
+    warn_on_not_found: bool = dataclasses.field(kw_only=True, default=False, repr=False)
+    error_on_not_found: bool = dataclasses.field(
+        kw_only=True, default=False, repr=False
+    )
+    list_cls: type[BaseParser] | None = dataclasses.field(
+        kw_only=True, default=None, repr=False
+    )
 
     @classmethod
     def from_dict(cls: type[C], data: dict[str, dict[str, Any]]) -> C:
-        dt = data.get(cls.dict_key)
+        dt: dict[str, Any] | list[dict[str, Any]] | None = data.get(cls.dict_key)
         if dt is None:
             if cls.warn_on_not_found:
                 bc_script.logger.add_warning(
@@ -88,6 +93,33 @@ class BaseParser:
             args.remove(key)
 
         inner_classes = cls.get_inner_classes()
+
+        if isinstance(dt, list):
+            if cls.list_cls is None:
+                raise ValueError("list_cls must be set for list types")
+            new_data_ls: list[Any] = []
+            for d in dt:
+                for key, value in d.items():  # type: ignore
+                    inner = inner_classes.get(cls.list_cls.dict_key)
+                    if inner is not None:
+                        clazz = inner.from_dict({cls.list_cls.dict_key: d})  # type: ignore
+                        value = clazz
+                    if key not in args:
+                        if inner is None:
+                            bc_script.logger.add_warning(
+                                f"`{key}` is not a valid key for `{cls.__name__}`! Valid keys are: `{args}`"
+                            )
+                    else:
+                        value = InputField(
+                            key, value, cls.__dataclass_fields__[key].type  # type: ignore
+                        ).value
+                        new_data_ls[key] = value
+                new_data_ls.append(value)  # type: ignore
+
+            kwargs = {cls.dict_key: new_data_ls}
+
+            c = cls(**kwargs)  # type: ignore
+            return c
 
         new_data: dict[str, Any] = {}
         for key, value in dt.items():

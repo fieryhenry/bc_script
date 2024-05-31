@@ -17,17 +17,25 @@ path = "SAVE_DATA_INPUT"
 package_name = "jp.co.ponos.battlecatsen"
 
 
-[edit.basic_items]
-catfood = 58999
-xp = 99999999
-normal_tickets = 9999
-rare_tickets = 9999
-platinum_tickets = 29
-legend_tickets = 4
-platinum_shards = 299
-np = 9999
-leadership = 9999
-battle_items = [9999, 9999, 9999, 9999, 9999, 9999]
+#[edit.basic_items]
+#catfood = 58999
+#xp = 99999999
+#normal_tickets = 9999
+#rare_tickets = 9999
+#platinum_tickets = 29
+#legend_tickets = 4
+#platinum_shards = 299
+#np = 9999
+#leadership = 9999
+#battle_items = [9999, 9999, 9999, 9999, 9999, 9999]
+
+[[edit.cats]]
+ids = "all"
+unlock = true
+upgrade = ["max", "max"]
+
+[[edit.cats]]
+ids = [0, 1, 2, 3]
 
 
 [save]
