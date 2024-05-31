@@ -1,0 +1,32 @@
+[pkg]
+schema = "bcsfe"
+version = "3.0.0"
+
+
+[info]
+name = "Example Script"
+author = "fieryhenry"
+version = "0.0.1"
+
+
+[load]
+country_code = "en"
+path = "SAVE_DATA_INPUT"
+
+[load.adb]
+package_name = "jp.co.ponos.battlecatsen"
+
+
+[edit.basic_items]
+catfood = "__input__"
+xp = 5000
+
+
+[save]
+path = "SAVE_DATA_MODIFIED"
+upload_managed_items = true
+
+# [save.transfer]
+
+[save.adb]
+rerun = true

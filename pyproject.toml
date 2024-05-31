@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bc_script"
+authors = [{ name = "fieryhenry" }]
+description = "bc_script"
+license = { text = "GNU General Public License v3 or later (GPLv3+)" }
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+]
+dependencies = ["argparse", "toml", "bcsfe"]
+dynamic = ["version"]
+keywords = ["scripting", "battle-cats", "save-editor", "python"]
+
+[project.urls]
+Homepage = "https://github.com/fieryhenry/bc_script"
+Repository = "https://github.com/fieryhenry/bc_script"
+Issues = "https://github.com/fieryhenry/bc_script/issues"
+Changelog = "https://github.com/fieryhenry/bc_script/blob/master/CHANGELOG.md"
+
+
+[tool.setuptools.dynamic]
+version = { attr = "bc_script.__version__" }
+
+[tool.setuptools]
+package-dir = { "" = "src" }
