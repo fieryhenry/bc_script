@@ -45,6 +45,9 @@ class Edit(BaseParser):
         np: int | None = None
         leadership: int | None = None
         battle_items: list[int] | dict[str, int] | None = None
+        catamins: list[int] | dict[str, int] | None = None
+        catseyes: list[int] | dict[str, int] | None = None
+        catfruit: list[int] | dict[str, int] | None = None
 
         def apply(self, s: SaveFile):
             edit = bc_script.ctx.edit
@@ -112,39 +115,51 @@ class Edit(BaseParser):
                 bc_script.logger.add_info(f"Set leadership to: {self.leadership}")
 
             if self.battle_items is not None:
-                battle_item_names: list[str] = [
-                    "speed_up",
-                    "treasure_radar",
-                    "rich_cat",
-                    "cat_cpu",
-                    "cat_jobs",
-                    "sniper_cat",
-                ]
 
-                if isinstance(self.battle_items, list):
-                    for i, amount in enumerate(self.battle_items):
-                        s.battle_items.items[i].amount = amount
-                elif isinstance(self.battle_items, dict):  # type: ignore
-                    for i, amount in self.battle_items.items():
-                        if i.isdigit():
-                            if int(i) < 0 or int(i) >= len(s.battle_items.items):
-                                bc_script.logger.add_warning(
-                                    f"Invalid battle item index: {i}"
-                                )
-                            else:
-                                s.battle_items.items[int(i)].amount = amount
+                data = [item.amount for item in s.battle_items.items]
+
+                self.set_grouped_data(self.battle_items, data, "battle_items")
+                for i, amount in enumerate(data):
+                    s.battle_items.items[i].amount = amount
+
+            if self.catamins is not None:
+                self.set_grouped_data(self.catamins, s.catamins, "catamins")
+
+            if self.catseyes is not None:
+                self.set_grouped_data(self.catseyes, s.catseyes, "catseyes")
+
+            if self.catfruit is not None:
+                self.set_grouped_data(self.catfruit, s.catfruit, "catfruit")
+
+        def set_grouped_data(
+            self,
+            data: dict[str, int] | list[int] | None,
+            save_data: list[int],
+            group_name: str,
+        ):
+            if isinstance(data, list):
+                for i, amount in enumerate(data):
+                    if i < 0 or i >= len(save_data):
+                        bc_script.logger.add_warning(f"Invalid {group_name} index: {i}")
+                    else:
+                        save_data[i] = amount
+            elif isinstance(data, dict):  # type: ignore
+                for i, amount in data.items():
+                    if i.isdigit():
+                        if int(i) < 0 or int(i) >= len(save_data):
+                            bc_script.logger.add_warning(
+                                f"Invalid {group_name} index: {i}"
+                            )
                         else:
-                            if i in battle_item_names:
-                                s.battle_items.items[
-                                    battle_item_names.index(i)
-                                ].amount = amount
-                            else:
-                                bc_script.logger.add_warning(
-                                    f"Invalid battle item name: {i}"
-                                )
-                else:
-                    bc_script.logger.add_warning(
-                        f"Invalid type for battle items: {type(self.battle_items)}"
-                    )
+                            save_data[int(i)] = amount
+                    else:
+                        bc_script.logger.add_warning(
+                            f"Invalid key for {group_name}: {i}"
+                        )
+            else:
+                bc_script.logger.add_warning(
+                    f"Invalid type for {group_name}: {type(data)}"
+                )
 
-                bc_script.logger.add_info(f"Set battle items to: {self.battle_items}")
+            bc_script.logger.add_info(f"Set {group_name} to: {data}")
+            return save_data
