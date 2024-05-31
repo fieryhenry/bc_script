@@ -18,15 +18,20 @@ package_name = "jp.co.ponos.battlecatsen"
 
 
 [edit.basic_items]
-catfood = "__input__"
-xp = 5000
+catfood = 58999
+xp = 99999999
+normal_tickets = 9999
+rare_tickets = 9999
+platinum_tickets = 29
+legend_tickets = 4
+platinum_shards = 299
+np = 9999
+leadership = 9999
+battle_items = [9999, 9999, 9999, 9999, 9999, 9999]
 
 
 [save]
 path = "SAVE_DATA_MODIFIED"
-upload_managed_items = true
-
-# [save.transfer]
 
 [save.adb]
 rerun = true
