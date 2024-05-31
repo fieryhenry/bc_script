@@ -35,6 +35,19 @@ python -m bc_script --help
 Scripts are written in toml format. You need to specify the path to the script
 file when running the module.
 
+Note that you can replace most values with the string `__input__` to prompt the
+user for input.
+
+e.g
+
+```toml
+[load]
+path = "__input__"
+
+[edit.basic_items]
+catfood = "__input__"
+```
+
 ```toml
 [pkg] # specify the package name and version used
 schema = "bcsfe" # only bcsfe is supported atm, tbcml may be added in the future
