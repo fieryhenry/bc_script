@@ -60,9 +60,15 @@ class Edit(BaseParser):
             ids: list[int] | None | str | list[str] = None
 
             unlock: bool | None = None
+
             upgrade: list[int | str] | None = None
             upgrade_base: int | str | None = None
             upgrade_plus: int | str | None = None
+
+            true_form: bool | None = None
+            ultra_form: bool | None = None
+            set_current_forms: bool = False
+            force_forms: bool = False
 
             def apply(self, s: SaveFile):
                 edit = bc_script.ctx.edit
@@ -106,6 +112,32 @@ class Edit(BaseParser):
                     self.set_cats(s, cats)
 
             def set_cats(self, s: SaveFile, cats: list[bcsfe.core.Cat]):
+                if self.true_form is not None:
+                    if self.true_form:
+                        s.cats.true_form_cats(
+                            s, cats, self.force_forms, self.set_current_forms
+                        )
+                        bc_script.logger.add_info("Set true form for cats")
+                    else:
+                        for cat in cats:
+                            cat.remove_true_form()
+                            bc_script.logger.add_info(
+                                f"Removed true form for cat: {cat.id}"
+                            )
+
+                if self.ultra_form is not None:
+                    if self.ultra_form:
+                        s.cats.fourth_form_cats(
+                            s, cats, self.force_forms, self.set_current_forms
+                        )
+                        bc_script.logger.add_info("Set ultra form for cats")
+                    else:
+                        for cat in cats:
+                            cat.remove_fourth_form()
+                            bc_script.logger.add_info(
+                                f"Removed ultra form for cat: {cat.id}"
+                            )
+
                 for cat in cats:
                     if self.unlock is not None:
                         cat.unlock(s) if self.unlock else cat.reset()
@@ -113,47 +145,50 @@ class Edit(BaseParser):
                             f"{'Unlocked' if self.unlock else 'Removed'} cat: {cat.id}"
                         )
 
-                    if self.upgrade is not None:
-                        if len(self.upgrade) != 2:
-                            bc_script.logger.add_warning(
-                                f"Invalid upgrade data: {self.upgrade}"
-                            )
+                    self.upgrade_cat(cat, s)
 
-                        upgrade_base = self.get_base(cat, s)
-                        upgrade_plus = self.get_plus(cat, s)
-
-                        if upgrade_base is None or upgrade_plus is None:
-                            continue
-
-                        upgrade = bcsfe.core.Upgrade(
-                            plus=upgrade_plus, base=upgrade_base - 1
-                        )
-                        cat.set_upgrade(s, upgrade)
-                        bc_script.logger.add_info(
-                            f"Set upgrade for cat: {cat.id} to {upgrade.base+1}+{upgrade.plus}"
+            def upgrade_cat(self, cat: bcsfe.core.Cat, s: SaveFile):
+                if self.upgrade is not None:
+                    if len(self.upgrade) != 2:
+                        bc_script.logger.add_warning(
+                            f"Invalid upgrade data: {self.upgrade}"
                         )
 
-                    if self.upgrade_base is not None:
-                        upgrade_base = self.get_base(cat, s)
-                        if upgrade_base is None:
-                            continue
-                        upgrade = cat.upgrade
-                        upgrade.base = upgrade_base - 1
-                        cat.set_upgrade(s, upgrade)
-                        bc_script.logger.add_info(
-                            f"Set upgrade base for cat: {cat.id} to {upgrade.base+1}"
-                        )
+                    upgrade_base = self.get_base(cat, s)
+                    upgrade_plus = self.get_plus(cat, s)
 
-                    if self.upgrade_plus is not None:
-                        upgrade_plus = self.get_plus(cat, s)
-                        if upgrade_plus is None:
-                            continue
-                        upgrade = cat.upgrade
-                        upgrade.plus = upgrade_plus
-                        cat.set_upgrade(s, upgrade)
-                        bc_script.logger.add_info(
-                            f"Set upgrade plus for cat: {cat.id} to +{upgrade.plus}"
-                        )
+                    if upgrade_base is None or upgrade_plus is None:
+                        return
+
+                    upgrade = bcsfe.core.Upgrade(
+                        plus=upgrade_plus, base=upgrade_base - 1
+                    )
+                    cat.set_upgrade(s, upgrade)
+                    bc_script.logger.add_info(
+                        f"Set upgrade for cat: {cat.id} to {upgrade.base+1}+{upgrade.plus}"
+                    )
+
+                if self.upgrade_base is not None:
+                    upgrade_base = self.get_base(cat, s)
+                    if upgrade_base is None:
+                        return
+                    upgrade = cat.upgrade
+                    upgrade.base = upgrade_base - 1
+                    cat.set_upgrade(s, upgrade)
+                    bc_script.logger.add_info(
+                        f"Set upgrade base for cat: {cat.id} to {upgrade.base+1}"
+                    )
+
+                if self.upgrade_plus is not None:
+                    upgrade_plus = self.get_plus(cat, s)
+                    if upgrade_plus is None:
+                        return
+                    upgrade = cat.upgrade
+                    upgrade.plus = upgrade_plus
+                    cat.set_upgrade(s, upgrade)
+                    bc_script.logger.add_info(
+                        f"Set upgrade plus for cat: {cat.id} to +{upgrade.plus}"
+                    )
 
             def get_base(self, cat: bcsfe.core.Cat, s: SaveFile):
                 powerup = bcsfe.core.PowerUpHelper(cat, s)

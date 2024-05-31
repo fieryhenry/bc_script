@@ -33,6 +33,8 @@ package_name = "jp.co.ponos.battlecatsen"
 ids = "all"
 unlock = true
 upgrade = ["max", "max"]
+true_form = true
+ultra_form = true
 
 [[edit.cats]]
 ids = [0, 1, 2, 3]
