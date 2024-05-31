@@ -5,6 +5,7 @@ version = "3.0.0"
 
 [info]
 name = "Example Script"
+description = "Does stuff"
 author = "fieryhenry"
 version = "0.0.1"
 

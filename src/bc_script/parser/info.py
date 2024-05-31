@@ -11,5 +11,6 @@ class Info(BaseParser):
     dict_key: str = "info"
 
     name: str = ""
+    description: str = ""
     author: str = ""
     version: str = "1.0.0"
