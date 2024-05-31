@@ -16,11 +16,14 @@ class Load(BaseParser):
     country_code: str | None = None
     path: str | None = None
 
+    file: File | None = None
     transfer: Transfer | None = None
     adb: Adb | None = None
 
     def load(self) -> SaveFile | None:
         bc_script.logger.add_info(f"Loading save file")
+        if self.file is not None:
+            return self.file.load()
         if self.transfer is not None:
             return self.transfer.load()
         if self.adb is not None:
@@ -35,7 +38,22 @@ class Load(BaseParser):
     def get_path(self) -> Path | None:
         if self.path is None:
             return None
+
         return Path(self.path)
+
+    @dataclasses.dataclass
+    class File(BaseParser):
+        dict_key: str = "file"
+
+        def load(self) -> SaveFile | None:
+            load = bc_script.ctx.load
+            if load is None:
+                return None
+            path = load.get_path()
+            if path is None:
+                return None
+            save_file = SaveFile(path.read())
+            return save_file
 
     @dataclasses.dataclass
     class Transfer(BaseParser):
