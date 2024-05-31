@@ -1,0 +1,13 @@
+talents
+talent orbs
+special skills
+init save
+convert save
+scheme items
+labyrinth medals
+levels
+gamatoto
+account
+gatya
+fixes
+other
