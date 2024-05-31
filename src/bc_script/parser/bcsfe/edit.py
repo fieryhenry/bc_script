@@ -70,6 +70,8 @@ class Edit(BaseParser):
             set_current_forms: bool = False
             force_forms: bool = False
 
+            claim_cat_guide: bool | None = None
+
             def apply(self, s: SaveFile):
                 edit = bc_script.ctx.edit
                 if edit is None:
@@ -112,6 +114,21 @@ class Edit(BaseParser):
                     self.set_cats(s, cats)
 
             def set_cats(self, s: SaveFile, cats: list[bcsfe.core.Cat]):
+                self.set_cat_forms(s, cats)
+
+                for cat in cats:
+                    if self.unlock is not None:
+                        cat.unlock(s) if self.unlock else cat.reset()
+                        bc_script.logger.add_info(
+                            f"{'Unlocked' if self.unlock else 'Removed'} cat: {cat.id}"
+                        )
+
+                    self.upgrade_cat(cat, s)
+
+                    if self.claim_cat_guide is not None:
+                        cat.catguide_collected = self.claim_cat_guide
+
+            def set_cat_forms(self, s: SaveFile, cats: list[bcsfe.core.Cat]):
                 if self.true_form is not None:
                     if self.true_form:
                         s.cats.true_form_cats(
@@ -137,15 +154,6 @@ class Edit(BaseParser):
                             bc_script.logger.add_info(
                                 f"Removed ultra form for cat: {cat.id}"
                             )
-
-                for cat in cats:
-                    if self.unlock is not None:
-                        cat.unlock(s) if self.unlock else cat.reset()
-                        bc_script.logger.add_info(
-                            f"{'Unlocked' if self.unlock else 'Removed'} cat: {cat.id}"
-                        )
-
-                    self.upgrade_cat(cat, s)
 
             def upgrade_cat(self, cat: bcsfe.core.Cat, s: SaveFile):
                 if self.upgrade is not None:
