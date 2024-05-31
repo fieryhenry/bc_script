@@ -124,3 +124,25 @@ package_name = "jp.co.ponos.battlecatsen" # the package name of the game if mult
 rerun = true # whether to rerun the game after saving
 
 [save.transfer] # specify the options to enable saving to a transfer code (optional)
+
+```
+
+## TODO
+
+most of these are features in bcsfe that need to be added to bc_script
+
+- Talents
+- Talent orbs
+- Special skills
+- Init empty save
+- Convert save versions
+- Load and save to json
+- Add scheme items
+- Add labyrinth medals
+- All level stuff
+- All gamatoto stuff
+- All account related stuff
+- All gatya related stuff
+- All fixes
+- All other stuff
+- Add support for tbcml
