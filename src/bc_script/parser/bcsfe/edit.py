@@ -18,7 +18,7 @@ class Edit(BaseParser):
     cats: Cats | None = None
 
     managed_items: list[str] | None = dataclasses.field(
-        default_factory=lambda: [s.value for s in ManagedItemType]
+        default_factory=lambda: [s.value.lower() for s in ManagedItemType]
     )
 
     def apply(self, s: SaveFile):
@@ -31,7 +31,7 @@ class Edit(BaseParser):
     def add_managed_item(self, s: SaveFile, change: int, type: ManagedItemType):
         if self.managed_items is None:
             return
-        if type.value in self.managed_items:
+        if type.value.lower() in self.managed_items:
             item = ManagedItem.from_change(change, type)
             bc_script.logger.add_info(f"Adding managed item: {item}")
             BackupMetaData(s).add_managed_item(item)
@@ -67,7 +67,7 @@ class Edit(BaseParser):
 
             true_form: bool | None = None
             ultra_form: bool | None = None
-            set_current_forms: bool = False
+            set_current_forms: bool = True
             force_forms: bool = False
 
             claim_cat_guide: bool | None = None
@@ -86,6 +86,8 @@ class Edit(BaseParser):
                         cats = s.cats.get_non_unlocked_cats()
                     elif self.ids == "obtainable":
                         cats = s.cats.get_cats_obtainable(s) or []
+                    elif self.ids == "non_obtainable":
+                        cats = s.cats.get_cats_non_obtainable(s) or []
                     else:
                         if not isinstance(self.ids, list):
                             ids = [self.ids]
