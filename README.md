@@ -3,6 +3,8 @@
 A scripting system for the mobile game The Battle Cats, integrates with
 [bcsfe](<https://github.com/fieryhenry/BCSFE_Python>) only at the moment.
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M53M4MN)
+
 ## Features
 
 - Load save from file, adb and transfer codes
