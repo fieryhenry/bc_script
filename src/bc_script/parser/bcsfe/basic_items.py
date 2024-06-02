@@ -117,20 +117,20 @@ class BasicItems(BaseParser):
         if isinstance(data, list):
             for i, amount in enumerate(data):
                 if i < 0 or i >= len(save_data):
-                    bc_script.logger.add_warning(f"Invalid {group_name} index: {i}")
+                    bc_script.logger.add_error(f"Invalid {group_name} index: {i}")
                 else:
                     save_data[i] = amount
         elif isinstance(data, dict):  # type: ignore
             for i, amount in data.items():
                 if i.isdigit():
                     if int(i) < 0 or int(i) >= len(save_data):
-                        bc_script.logger.add_warning(f"Invalid {group_name} index: {i}")
+                        bc_script.logger.add_error(f"Invalid {group_name} index: {i}")
                     else:
                         save_data[int(i)] = amount
                 else:
-                    bc_script.logger.add_warning(f"Invalid key for {group_name}: {i}")
+                    bc_script.logger.add_error(f"Invalid key for {group_name}: {i}")
         else:
-            bc_script.logger.add_warning(f"Invalid type for {group_name}: {type(data)}")
+            bc_script.logger.add_error(f"Invalid type for {group_name}: {type(data)}")
 
         bc_script.logger.add_info(f"Set {group_name} to: {data}")
         return save_data
@@ -173,7 +173,7 @@ class BasicItems(BaseParser):
                         else:
                             parts = talent.split("-")
                             if not parts:
-                                bc_script.logger.add_warning(
+                                bc_script.logger.add_error(
                                     f"Invalid talent orb: {talent}"
                                 )
                                 continue
@@ -188,8 +188,6 @@ class BasicItems(BaseParser):
                                 grade = None
                             if not attribute:
                                 attribute = None
-
-                            print(effect, grade, attribute)
 
                             for orb in all_orbs:
                                 effect_id = orb.raw_orb_info.effect_id
