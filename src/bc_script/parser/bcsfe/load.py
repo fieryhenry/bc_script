@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 
 from bcsfe.core import CountryCode, GameVersion, Path, SaveFile, ServerHandler, JsonFile
 
 import bc_script
 from bc_script.parser.parse import BaseParser
+
+from typeguard import typechecked
 
 
 @dataclasses.dataclass
@@ -20,6 +23,15 @@ class Load(BaseParser):
     transfer: Transfer | None = None
     adb: Adb | None = None
     json: Json | None = None
+
+    @typechecked
+    def __new__(
+        cls,
+        country_code: str | None = None,
+        path: str | None = None,
+        **kwargs: typing.Any,
+    ):
+        return super().__new__(cls)
 
     def load(self) -> SaveFile | None:
         bc_script.logger.add_info(f"Loading save file")
@@ -64,6 +76,12 @@ class Load(BaseParser):
         confirmation_code: str = dataclasses.field(kw_only=True)
         dict_key: str = "transfer"
 
+        @typechecked
+        def __new__(
+            cls, transfer_code: str, confirmation_code: str, **kwargs: typing.Any
+        ):
+            return super().__new__(cls)
+
         def load(self) -> SaveFile | None:
             ctx = bc_script.ctx
             if ctx.load is None:
@@ -94,6 +112,15 @@ class Load(BaseParser):
         device: str | None = None
         package_name: str | None = None
 
+        @typechecked
+        def __new__(
+            cls,
+            device: str | None = None,
+            package_name: str | None = None,
+            **kwargs: typing.Any,
+        ):
+            return super().__new__(cls)
+
         def load(self) -> SaveFile | None:
             ctx = bc_script.ctx
             load = ctx.load
@@ -122,6 +149,10 @@ class Load(BaseParser):
     class Json(BaseParser):
         dict_key: str = "json"
         path: str = dataclasses.field(kw_only=True)
+
+        @typechecked
+        def __new__(cls, path: str, **kwargs: typing.Any):
+            return super().__new__(cls)
 
         def load(self) -> SaveFile | None:
             load = bc_script.ctx.load

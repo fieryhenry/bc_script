@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 
 
 from bcsfe.core import SaveFile
@@ -8,6 +9,7 @@ import bcsfe
 
 import bc_script
 from bc_script.parser.parse import BaseParser
+from typeguard import typechecked
 
 
 @dataclasses.dataclass
@@ -47,6 +49,23 @@ class Cats(BaseParser):
         claim_cat_guide: bool | None = None
 
         talents: Talents | None = None
+
+        @typechecked
+        def __new__(
+            cls,
+            ids: list[int | str] | None | str = None,
+            unlock: bool | None = None,
+            upgrade: list[int | str] | None = None,
+            upgrade_base: int | str | None = None,
+            upgrade_plus: int | str | None = None,
+            true_form: bool | None = None,
+            ultra_form: bool | None = None,
+            set_current_forms: bool = True,
+            force_forms: bool = False,
+            claim_cat_guide: bool | None = None,
+            **kwargs: typing.Any,
+        ):
+            return super().__new__(cls)
 
         def apply(self, s: SaveFile):
             edit = bc_script.ctx.edit
@@ -212,6 +231,15 @@ class Cats(BaseParser):
 
             talents: dict[str, str | int] | None = None
             keep_existing: bool = True
+
+            @typechecked
+            def __new__(
+                cls,
+                talents: dict[str, str | int] | None = None,
+                keep_existing: bool = True,
+                **kwargs: typing.Any,
+            ):
+                return super().__new__(cls)
 
             def apply(self, s: SaveFile, cats: list[bcsfe.core.Cat]):
                 edit = bc_script.ctx.edit

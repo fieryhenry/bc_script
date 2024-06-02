@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import dataclasses
+from typing import Any
 
 
 from bcsfe.core import ManagedItemType, SaveFile, OrbInfoList
 
 import bc_script
 from bc_script.parser.parse import BaseParser
+
+from typeguard import typechecked
 
 
 @dataclasses.dataclass
@@ -139,8 +142,17 @@ class BasicItems(BaseParser):
     class TalentOrbs(BaseParser):
         dict_key: str = "talent_orbs"
 
-        orbs: dict[str, int] | None = None
+        orbs: dict[str, int | str] | None = None
         keep_previous: bool = True
+
+        @typechecked
+        def __new__(
+            cls,
+            orbs: dict[str, int | str] | None = None,
+            keep_previous: bool = True,
+            **kwargs: Any,
+        ):
+            return super().__new__(cls)
 
         def apply(self, s: SaveFile):
             edit = bc_script.ctx.edit
@@ -159,6 +171,14 @@ class BasicItems(BaseParser):
                     bc_script.logger.add_info("Cleared talent orbs")
 
                 for talent, amount in self.orbs.items():
+                    if not str(amount).isdigit():
+                        bc_script.logger.add_error(
+                            f"Invalid talent orb amount: {amount}"
+                        )
+                        continue
+
+                    amount = int(amount)
+
                     if talent.isdigit():
                         id = int(talent)
                         s.talent_orbs.set_orb(id, amount)
@@ -236,3 +256,23 @@ class BasicItems(BaseParser):
                                 bc_script.logger.add_info(
                                     f"Set talent orb {orb.raw_orb_info.orb_id} to: {amount}"
                                 )
+
+    @typechecked
+    def __new__(
+        cls,
+        catfood: int | None = None,
+        xp: int | None = None,
+        normal_tickets: int | None = None,
+        rare_tickets: int | None = None,
+        platinum_tickets: int | None = None,
+        legend_tickets: int | None = None,
+        platinum_shards: int | None = None,
+        np: int | None = None,
+        leadership: int | None = None,
+        battle_items: list[int] | dict[str, int] | None = None,
+        catamins: list[int] | dict[str, int] | None = None,
+        catseyes: list[int] | dict[str, int] | None = None,
+        catfruit: list[int] | dict[str, int] | None = None,
+        **kwargs: Any,
+    ):
+        return super().__new__(cls)

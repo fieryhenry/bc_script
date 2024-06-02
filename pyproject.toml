@@ -20,7 +20,7 @@ classifiers = [
 ]
 dependencies = ["argparse", "toml", "bcsfe", "colorama"]
 dynamic = ["version"]
-keywords = ["scripting", "battle-cats", "save-editor", "python"]
+keywords = ["scripting", "battle-cats", "save-editor", "python", "typeguard"]
 
 [project.urls]
 Homepage = "https://github.com/fieryhenry/bc_script"

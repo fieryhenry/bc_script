@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 
 
 from bcsfe.core import BackupMetaData, ManagedItem, ManagedItemType, SaveFile
@@ -12,6 +13,8 @@ from bc_script.parser.bcsfe.cats import Cats
 from bc_script.parser.bcsfe.special_skills import SpecialSkills
 
 import bcsfe
+
+from typeguard import typechecked
 
 
 @dataclasses.dataclass
@@ -28,6 +31,15 @@ class Edit(BaseParser):
     )
 
     forced_locale: str | None = None
+
+    @typechecked
+    def __new__(
+        cls,
+        managed_items: list[str] | None = None,
+        forced_locale: str | None = None,
+        **kwargs: typing.Any,
+    ):
+        return super().__new__(cls)
 
     def apply(self, s: SaveFile):
         bc_script.logger.add_info("Applying edit")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 
 
 from bcsfe.core import SaveFile
@@ -8,6 +9,8 @@ import bcsfe
 
 import bc_script
 from bc_script.parser.parse import BaseParser
+
+from typeguard import typechecked
 
 
 @dataclasses.dataclass
@@ -35,6 +38,17 @@ class SpecialSkills(BaseParser):
         upgrade: list[int | str] | None = None
         upgrade_base: int | str | None = None
         upgrade_plus: int | str | None = None
+
+        @typechecked
+        def __new__(
+            cls,
+            ids: list[int | str] | None | str = None,
+            upgrade: list[int | str] | None = None,
+            upgrade_base: int | str | None = None,
+            upgrade_plus: int | str | None = None,
+            **kwargs: typing.Any,
+        ):
+            return super().__new__(cls)
 
         def apply(self, s: SaveFile):
             edit = bc_script.ctx.edit

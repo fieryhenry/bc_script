@@ -5,6 +5,7 @@ import inspect
 from typing import Any, Callable, TypeVar
 
 import bcsfe
+import typeguard
 
 import bc_script
 
@@ -12,8 +13,14 @@ import bc_script
 def parse(data: dict[str, Any]):
     ctx = bc_script.ctx
     pkg = bc_script.parser.pkg.Pkg.from_dict(data)
+    if pkg is None:
+        bc_script.logger.add_error("Failed to load pkg")
+        return
     ctx.pkg = pkg
     info = bc_script.parser.info.Info.from_dict(data)
+    if info is None:
+        bc_script.logger.add_error("Failed to load info")
+        return
     ctx.info = info
 
     if pkg.schema == "bcsfe":
@@ -38,6 +45,8 @@ def do(
     out_path: bcsfe.core.Path | None,
 ):
     ctx = parse(script_data)
+    if ctx is None:
+        return
 
     if in_path is not None:
         save = load_save(in_path)
@@ -77,7 +86,7 @@ class BaseParser:
     )
 
     @classmethod
-    def from_dict(cls: type[C], data: dict[str, dict[str, Any]]) -> C:
+    def from_dict(cls: type[C], data: dict[str, dict[str, Any]]) -> C | None:
         dt: dict[str, Any] | list[dict[str, Any]] | None = data.get(cls.dict_key)
         if dt is None:
             if cls.warn_on_not_found:
@@ -123,7 +132,13 @@ class BaseParser:
 
             kwargs = {cls.dict_key: new_data_ls}
 
-            c = cls(**kwargs)  # type: ignore
+            try:
+                c = cls(**kwargs)  # type: ignore
+            except typeguard.TypeCheckError as e:
+                bc_script.logger.add_error(
+                    f"Failed to create {cls.__name__} with error: {e}"
+                )
+                return None
             return c
 
         new_data: dict[str, Any] = {}
@@ -141,7 +156,13 @@ class BaseParser:
                 value = InputField(key, value, cls.__dataclass_fields__[key].type).value
                 new_data[key] = value
 
-        return cls(**new_data)
+        try:
+            return cls(**new_data)
+        except typeguard.TypeCheckError as e:
+            bc_script.logger.add_error(
+                f"Failed to create {cls.__name__} with error: {e}"
+            )
+            return None
 
     @classmethod
     def get_inner_classes(cls):

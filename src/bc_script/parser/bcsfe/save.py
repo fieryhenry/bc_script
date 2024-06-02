@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 
 from bcsfe.core import BackupMetaData, Path, SaveFile, ServerHandler, JsonFile
 
 import bc_script
 from bc_script.parser.parse import BaseParser
+
+from typeguard import typechecked
 
 
 @dataclasses.dataclass
@@ -19,6 +22,15 @@ class Save(BaseParser):
     transfer: Transfer | None = None
     adb: Adb | None = None
     json: Json | None = None
+
+    @typechecked
+    def __new__(
+        cls,
+        path: str | None = None,
+        upload_managed_items: bool = True,
+        **kwargs: typing.Any,
+    ):
+        return super().__new__(cls)
 
     def save(self, s: SaveFile):
         bc_script.logger.add_info("Saving save file")
@@ -98,6 +110,16 @@ class Save(BaseParser):
         device: str | None = None
         package_name: str | None = None
 
+        @typechecked
+        def __new__(
+            cls,
+            rerun: bool = False,
+            device: str | None = None,
+            package_name: str | None = None,
+            **kwargs: typing.Any,
+        ):
+            return super().__new__(cls)
+
         def save(self, s: SaveFile):
             ctx = bc_script.ctx
             save = ctx.save
@@ -133,6 +155,10 @@ class Save(BaseParser):
     class Json(BaseParser):
         dict_key: str = "json"
         path: str | None = None
+
+        @typechecked
+        def __new__(cls, path: str | None = None, **kwargs: typing.Any):
+            return super().__new__(cls)
 
         def save(self, s: SaveFile):
             sv = bc_script.ctx.save
