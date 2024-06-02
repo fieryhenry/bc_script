@@ -154,9 +154,9 @@ upgrade = [10, 20] # the levels to upgrade the special skills to (base, +)
 upgrade_base = 10 # just upgrade the base level
 upgrade_plus = 20 # just upgrade the + level
 
-[[edit.special_skills.talents]] # again it's a list of tables like cats
+[[edit.special_skills]] # again it's a list of tables like cats
 ids = [5, 6, 7] # so you can specify multiple special skill edit options for different special skill sets
-
+upgrade = ["max", "max"] # and you can specify different options for each set
 
 
 
