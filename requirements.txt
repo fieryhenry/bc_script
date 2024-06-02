@@ -1,3 +1,4 @@
 toml==0.10.2
 argparse==1.4.0
 bcsfe==3.0.0
+colorama==0.4.6

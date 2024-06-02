@@ -18,7 +18,7 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: OS Independent",
 ]
-dependencies = ["argparse", "toml", "bcsfe"]
+dependencies = ["argparse", "toml", "bcsfe", "colorama"]
 dynamic = ["version"]
 keywords = ["scripting", "battle-cats", "save-editor", "python"]
 
