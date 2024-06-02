@@ -31,7 +31,7 @@ class Cats(BaseParser):
     class CatEdit(BaseParser):
         dict_key: str = "cat"
 
-        ids: list[int] | None | str | list[str] = None
+        ids: list[int | str] | None | str = None
 
         unlock: bool | None = None
 
@@ -53,41 +53,43 @@ class Cats(BaseParser):
             if edit is None:
                 return
 
-            if self.ids is not None:
-                if self.ids == "all":
-                    cats = s.cats.get_all_cats()
-                elif self.ids == "unlocked":
-                    cats = s.cats.get_unlocked_cats()
-                elif self.ids == "non_unlocked":
-                    cats = s.cats.get_non_unlocked_cats()
-                elif self.ids == "obtainable":
-                    cats = s.cats.get_cats_obtainable(s) or []
-                elif self.ids == "non_obtainable":
-                    cats = s.cats.get_cats_non_obtainable(s) or []
+            if self.ids is None:
+                return
+
+            if self.ids == "all":
+                cats = s.cats.get_all_cats()
+            elif self.ids == "unlocked":
+                cats = s.cats.get_unlocked_cats()
+            elif self.ids == "non_unlocked":
+                cats = s.cats.get_non_unlocked_cats()
+            elif self.ids == "obtainable":
+                cats = s.cats.get_cats_obtainable(s) or []
+            elif self.ids == "non_obtainable":
+                cats = s.cats.get_cats_non_obtainable(s) or []
+            else:
+                if not isinstance(self.ids, list):
+                    ids = [self.ids]
                 else:
-                    if not isinstance(self.ids, list):
-                        ids = [self.ids]
+                    ids = self.ids
+
+                cats: list[bcsfe.core.Cat] = []
+
+                for id in ids:
+                    id = str(id)
+                    if id.isdigit():
+                        cat = s.cats.get_cat_by_id(int(id))
+                        if cat is not None:
+                            cats.append(cat)
+                    elif id.startswith("rarity-"):
+                        rarity = int(id.split("-")[1])
+                        cats.extend(s.cats.get_cats_rarity(s, rarity))
+                    elif id.startswith("banner-"):
+                        banner = int(id.split("-")[1])
+                        cats.extend(s.cats.get_cats_gatya_banner(s, banner) or [])
                     else:
-                        ids = self.ids
+                        bc_script.logger.add_error(f"Invalid cat id: {id}")
 
-                    cats: list[bcsfe.core.Cat] = []
-
-                    for id in ids:
-                        id = str(id)
-                        if id.isdigit():
-                            cat = s.cats.get_cat_by_id(int(id))
-                            if cat is not None:
-                                cats.append(cat)
-                        elif id.startswith("rarity-"):
-                            rarity = int(id.split("-")[1])
-                            cats.extend(s.cats.get_cats_rarity(s, rarity))
-                        elif id.startswith("banner-"):
-                            banner = int(id.split("-")[1])
-                            cats.extend(s.cats.get_cats_gatya_banner(s, banner) or [])
-                        else:
-                            bc_script.logger.add_error(f"Invalid cat id: {id}")
-
-                self.set_cats(s, cats)
+            self.set_cats(s, cats)
 
         def set_cats(self, s: SaveFile, cats: list[bcsfe.core.Cat]):
             self.set_cat_forms(s, cats)
@@ -142,8 +144,8 @@ class Cats(BaseParser):
                 if len(self.upgrade) != 2:
                     bc_script.logger.add_error(f"Invalid upgrade data: {self.upgrade}")
 
-                upgrade_base = self.get_base(cat, s)
-                upgrade_plus = self.get_plus(cat, s)
+                upgrade_base = self.get_base(cat, s, self.upgrade[0])
+                upgrade_plus = self.get_plus(cat, s, self.upgrade[1])
 
                 if upgrade_base is None or upgrade_plus is None:
                     return
@@ -155,7 +157,7 @@ class Cats(BaseParser):
                 )
 
             if self.upgrade_base is not None:
-                upgrade_base = self.get_base(cat, s)
+                upgrade_base = self.get_base(cat, s, self.upgrade_base)
                 if upgrade_base is None:
                     return
                 upgrade = cat.upgrade
@@ -166,7 +168,7 @@ class Cats(BaseParser):
                 )
 
             if self.upgrade_plus is not None:
-                upgrade_plus = self.get_plus(cat, s)
+                upgrade_plus = self.get_plus(cat, s, self.upgrade_plus)
                 if upgrade_plus is None:
                     return
                 upgrade = cat.upgrade
@@ -176,39 +178,31 @@ class Cats(BaseParser):
                     f"Set upgrade plus for cat: {cat.id} to +{upgrade.plus}"
                 )
 
-        def get_base(self, cat: bcsfe.core.Cat, s: SaveFile):
+        def get_base(self, cat: bcsfe.core.Cat, s: SaveFile, level: str | int):
             powerup = bcsfe.core.PowerUpHelper(cat, s)
-            if self.upgrade is None:
-                return None
 
-            if isinstance(self.upgrade[0], str) and not str(self.upgrade[0]).isdigit():
-                if self.upgrade[0] == "max":
+            if isinstance(level, str) and not str(level).isdigit():
+                if level == "max":
                     upgrade_base = powerup.get_max_possible_base()
                 else:
-                    bc_script.logger.add_error(
-                        f"Invalid upgrade base: {self.upgrade[0]}"
-                    )
+                    bc_script.logger.add_error(f"Invalid upgrade base: {level}")
                     return None
             else:
-                upgrade_base = int(self.upgrade[0])
+                upgrade_base = int(level)
 
             return upgrade_base
 
-        def get_plus(self, cat: bcsfe.core.Cat, s: SaveFile):
+        def get_plus(self, cat: bcsfe.core.Cat, s: SaveFile, level: str | int):
             powerup = bcsfe.core.PowerUpHelper(cat, s)
-            if self.upgrade is None:
-                return None
 
-            if isinstance(self.upgrade[1], str) and not str(self.upgrade[1]).isdigit():
-                if self.upgrade[1] == "max":
+            if isinstance(level, str) and not str(level).isdigit():
+                if level == "max":
                     upgrade_plus = powerup.get_max_possible_plus()
                 else:
-                    bc_script.logger.add_error(
-                        f"Invalid upgrade plus: {self.upgrade[1]}"
-                    )
+                    bc_script.logger.add_error(f"Invalid upgrade plus: {level}")
                     return None
             else:
-                upgrade_plus = int(self.upgrade[1])
+                upgrade_plus = int(level)
 
             return upgrade_plus
 
