@@ -133,6 +133,16 @@ claim_cat_guide = true # whether to claim the cat guide for the cats. does not g
 ids = [0, 1, 2] # you can specify multiple cat edit options for different cat sets
 unlock = false # with different options
 
+[edit.cats.talents]
+talents = {0=10, 1=5, 2="max"} # the talents to set for the cats
+# 0 = first talent, 1 = second talent, 2 = third talent, etc
+# the values are the levels of the talents
+# "max" = max level of the talent
+# you can also say 
+# talents = {all = "max"} to set all talents to max level
+
+keep_existing = false # whether to keep the existing talents or not. Defaults to true if not specified
+
 
 [save]
 path = "path/to/save/file" # the path you want to save the save file to

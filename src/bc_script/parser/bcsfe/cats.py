@@ -46,6 +46,8 @@ class Cats(BaseParser):
 
         claim_cat_guide: bool | None = None
 
+        talents: Talents | None = None
+
         def apply(self, s: SaveFile):
             edit = bc_script.ctx.edit
             if edit is None:
@@ -83,7 +85,7 @@ class Cats(BaseParser):
                             banner = int(id.split("-")[1])
                             cats.extend(s.cats.get_cats_gatya_banner(s, banner) or [])
                         else:
-                            bc_script.logger.add_warning(f"Invalid cat id: {id}")
+                            bc_script.logger.add_error(f"Invalid cat id: {id}")
 
                 self.set_cats(s, cats)
 
@@ -101,6 +103,12 @@ class Cats(BaseParser):
 
                 if self.claim_cat_guide is not None:
                     cat.catguide_collected = self.claim_cat_guide
+                    bc_script.logger.add_info(
+                        f"{'Claimed' if self.claim_cat_guide else 'Removed'} cat guide for cat: {cat.id}"
+                    )
+
+            if self.talents is not None:
+                self.talents.apply(s, cats)
 
         def set_cat_forms(self, s: SaveFile, cats: list[bcsfe.core.Cat]):
             if self.true_form is not None:
@@ -132,9 +140,7 @@ class Cats(BaseParser):
         def upgrade_cat(self, cat: bcsfe.core.Cat, s: SaveFile):
             if self.upgrade is not None:
                 if len(self.upgrade) != 2:
-                    bc_script.logger.add_warning(
-                        f"Invalid upgrade data: {self.upgrade}"
-                    )
+                    bc_script.logger.add_error(f"Invalid upgrade data: {self.upgrade}")
 
                 upgrade_base = self.get_base(cat, s)
                 upgrade_plus = self.get_plus(cat, s)
@@ -179,7 +185,7 @@ class Cats(BaseParser):
                 if self.upgrade[0] == "max":
                     upgrade_base = powerup.get_max_possible_base()
                 else:
-                    bc_script.logger.add_warning(
+                    bc_script.logger.add_error(
                         f"Invalid upgrade base: {self.upgrade[0]}"
                     )
                     return None
@@ -197,7 +203,7 @@ class Cats(BaseParser):
                 if self.upgrade[1] == "max":
                     upgrade_plus = powerup.get_max_possible_plus()
                 else:
-                    bc_script.logger.add_warning(
+                    bc_script.logger.add_error(
                         f"Invalid upgrade plus: {self.upgrade[1]}"
                     )
                     return None
@@ -205,5 +211,94 @@ class Cats(BaseParser):
                 upgrade_plus = int(self.upgrade[1])
 
             return upgrade_plus
+
+        @dataclasses.dataclass
+        class Talents(BaseParser):
+            dict_key: str = "talents"
+
+            talents: dict[str, str | int] | None = None
+            keep_existing: bool = True
+
+            def apply(self, s: SaveFile, cats: list[bcsfe.core.Cat]):
+                edit = bc_script.ctx.edit
+                if edit is None:
+                    return
+
+                if self.talents is None:
+                    return
+
+                talent_data = s.cats.read_talent_data(s)
+                if talent_data is None:
+                    bc_script.logger.add_warning("Failed to read talent data")
+                    return
+
+                for cat in cats:
+                    if cat.talents is None:
+                        if len(cats) < 20:  # Only log if there are few cats
+                            bc_script.logger.add_warning(
+                                f"Failed to read talents for cat: {cat.id}"
+                            )
+                        continue
+
+                    if not self.keep_existing:
+                        for talent in cat.talents:
+                            talent.level = 0
+
+                    cat_talent_data = talent_data.get_cat_talents(cat)
+                    if cat_talent_data is None:
+                        bc_script.logger.add_warning(
+                            f"Failed to read talent data for cat: {cat.id}"
+                        )
+                        continue
+
+                    talent_names, max_levels, _, ids = cat_talent_data
+
+                    talent_ids: list[tuple[int, str]] = []
+
+                    for talent_id, level in self.talents.items():
+                        if talent_id == "all":
+                            talent_ids = [(i, str(level)) for i in range(len(ids))]
+                            break
+                        if not talent_id.isdigit():
+                            bc_script.logger.add_error(
+                                f"Invalid talent id: {talent_id}"
+                            )
+                            continue
+                        talent_ids.append((int(talent_id), str(level)))
+
+                    for talent_id, level in talent_ids:
+                        id = ids[talent_id]
+                        name = talent_names[talent_id]
+                        max_level = max_levels[talent_id]
+                        talent = cat.get_talent_from_id(id)
+                        if talent is None:
+                            bc_script.logger.add_warning(
+                                f"Failed to find talent with id: {talent_id}"
+                            )
+                            continue
+
+                        if max_level == 0:
+                            max_level = 1
+
+                        if level == "max":
+                            lv = max_level
+                        else:
+                            if not level.isdigit():
+                                bc_script.logger.add_error(
+                                    f"Invalid talent level: {level}"
+                                )
+                                continue
+                            lv = int(level)
+
+                        if lv > max_level:
+                            bc_script.logger.add_warning(
+                                f"Talent level exceeds max level: {name} ({lv} > {max_level})"
+                            )
+
+                        talent.level = lv
+
+                        bc_script.logger.add_info(
+                            f"Set talent level for cat: {cat.id} talent: {name} to {lv}"
+                        )
 
     list_cls = CatEdit
