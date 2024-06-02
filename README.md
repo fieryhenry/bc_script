@@ -77,6 +77,7 @@ confirmation_code = "01234" # the confirmation code to load from
 
 [edit] # specify the main save data edit options (optional)
 managed_items = ["catfood", "rareticket", "platinumticket", "legendticket"] # the items to send to the game servers to prevent bans, defaults to the above if not specified
+forced_locale = "en" # the locale to force the editor to use, valid options are "en", "jp", "kr", "tw" (optional)
 
 [edit.basic_items] # specify the basic items to edit (optional)
 catfood = 10000 
@@ -97,6 +98,12 @@ catamins = [0, 1, 2]
 catseyes = [0, 1, 2, 3, 4]
 catfruit = {0 = 10, 3 = 50}
 
+[edit.basic_items.talent_orbs]
+orbs = {0 = 10, "massive-s-alien" = 5, "-d-red" = 3, "all" = 1, "strong-a-" = 2}
+# the above are examples of the different formats you can use.
+# Note that the names of the orbs follow the same format as the names in the
+# game files. So if you are using jp, the names will be in jp, etc.
+keep_previous = false # whether to keep the previous orbs or not. Defaults to true if not specified
 
 [[edit.cats]] # specify the cat edit options (optional)
 ids = [0, 1, 2] # the ids of the cats to edit:
