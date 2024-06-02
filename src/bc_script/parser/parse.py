@@ -72,6 +72,9 @@ class BaseParser:
     list_cls: type[BaseParser] | None = dataclasses.field(
         kw_only=True, default=None, repr=False
     )
+    subclasses: list[type[BaseParser]] | None = dataclasses.field(
+        kw_only=True, default=None
+    )
 
     @classmethod
     def from_dict(cls: type[C], data: dict[str, dict[str, Any]]) -> C:
@@ -140,11 +143,13 @@ class BaseParser:
 
     @classmethod
     def get_inner_classes(cls):
-        return {
+        classes = {
             cls_attribute.dict_key: cls_attribute
             for cls_attribute in cls.__dict__.values()
             if inspect.isclass(cls_attribute) and issubclass(cls_attribute, BaseParser)
         }
+        classes.update({sub.dict_key: sub for sub in cls.subclasses or []})
+        return classes
 
 
 class InputField:

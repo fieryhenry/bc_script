@@ -17,8 +17,13 @@ path = "SAVE_DATA_INPUT"
 [load.adb]
 package_name = "jp.co.ponos.battlecatsen"
 
+[edit]
+forced_locale = "en"
 
-#[edit.basic_items]
+[edit.basic_items]
+[edit.basic_items.talent_orbs]
+orbs = { "massive-s-alien" = 5 }
+keep_previous = false
 #catfood = 58999
 #xp = 99999999
 #normal_tickets = 9999
@@ -30,16 +35,15 @@ package_name = "jp.co.ponos.battlecatsen"
 #leadership = 9999
 #battle_items = [9999, 9999, 9999, 9999, 9999, 9999]
 
-[[edit.cats]]
-ids = "all"
-unlock = true
-upgrade = ["max", "max"]
-true_form = true
-ultra_form = true
-
-[[edit.cats]]
-ids = [0, 1, 2, 3]
-
+#[[edit.cats]]
+#ids = "all"
+#unlock = true
+#upgrade = ["max", "max"]
+#true_form = true
+#ultra_form = true
+#
+#[[edit.cats]]
+#ids = [9]
 
 [save]
 path = "SAVE_DATA_MODIFIED"
