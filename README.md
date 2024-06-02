@@ -47,7 +47,7 @@ e.g
 path = "__input__"
 
 [edit.basic_items]
-catfood = "__input__"
+catfood = "__input__(this is displayed to the user)"
 ```
 
 ```toml
