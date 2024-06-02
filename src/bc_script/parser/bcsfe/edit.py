@@ -18,14 +18,14 @@ class Edit(BaseParser):
     warn_on_not_found = True
     dict_key: str = "edit"
 
-    forced_locale: str | None = None
-
     basic_items: bc_script.parser.bcsfe.basic_items.BasicItems | None = None
     cats: bc_script.parser.bcsfe.cats.Cats | None = None
 
     managed_items: list[str] | None = dataclasses.field(
         default_factory=lambda: [s.value.lower() for s in ManagedItemType]
     )
+
+    forced_locale: str | None = None
 
     def apply(self, s: SaveFile):
         bc_script.logger.add_info("Applying edit")
