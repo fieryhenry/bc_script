@@ -17,11 +17,15 @@ path = "SAVE_DATA_INPUT"
 [load.adb]
 package_name = "jp.co.ponos.battlecatsen"
 
-[edit.basic_items]
+[[edit.special_skills]]
+ids = "all"
+upgrade = ["max", "max"]
+
+# [edit.basic_items]
 #xp = "__input__"
 #catfood = 58999
 #xp = 99999999
-normal_tickets = 9999
+#normal_tickets = 9999
 #rare_tickets = 9999
 #platinum_tickets = 29
 #legend_tickets = 4
@@ -30,9 +34,9 @@ normal_tickets = 9999
 #leadership = 9999
 #battle_items = [9999, 9999, 9999, 9999, 9999, 9999]
 
-[edit.basic_items.talent_orbs]
-orbs = { "__input__" = "__input__" }
-keep_previous = false
+#[edit.basic_items.talent_orbs]
+#orbs = { "__input__" = "__input__" }
+#keep_previous = false
 
 
 #[[edit.cats]]
@@ -42,12 +46,12 @@ keep_previous = false
 #true_form = true
 #ultra_form = true
 #
-[[edit.cats]]
+# [[edit.cats]]
 #ids = ["__input__(enter cat ids)"]
 
-[edit.cats.talents]
+# [edit.cats.talents]
 #talents = { all = "__input__(enter level for talents)" }
-keep_existing = false
+# keep_existing = false
 
 [save]
 path = "SAVE_DATA_MODIFIED"

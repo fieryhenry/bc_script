@@ -144,6 +144,22 @@ talents = {0=10, 1=5, 2="max"} # the talents to set for the cats
 keep_existing = false # whether to keep the existing talents or not. Defaults to true if not specified
 
 
+[[edits.special_skills]]
+ids = [0, 1, 2] # the ids of the special skills to edit
+# ids = "all" to edit all special skills
+upgrade = [10, 20] # the levels to upgrade the special skills to (base, +)
+# upgrade = ["max", 20] to upgrade the special skills to the max base level
+# upgrade = [10, "max"] to upgrade the special skills to the max + level
+# upgrade = ["max", "max"] to upgrade the special skills to the max base and + levels
+upgrade_base = 10 # just upgrade the base level
+upgrade_plus = 20 # just upgrade the + level
+
+[[edit.special_skills.talents]] # again it's a list of tables like cats
+ids = [5, 6, 7] # so you can specify multiple special skill edit options for different special skill sets
+
+
+
+
 [save]
 path = "path/to/save/file" # the path you want to save the save file to
 upload_managed_items = true # whether to upload the managed items to the game servers to prevent bans
@@ -163,7 +179,6 @@ rerun = true # whether to rerun the game after saving
 
 most of these are features in bcsfe that need to be added to bc_script
 
-- Special skills
 - Init empty save
 - Convert save versions
 - Load and save to json
