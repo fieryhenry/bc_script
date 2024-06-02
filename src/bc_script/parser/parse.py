@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
-from typing import Any, TypeVar
+from typing import Any, Callable, TypeVar
 
 import bcsfe
 
@@ -102,22 +102,24 @@ class BaseParser:
                 raise ValueError("list_cls must be set for list types")
             new_data_ls: list[Any] = []
             for d in dt:
-                for key, value in d.items():  # type: ignore
-                    inner = inner_classes.get(cls.list_cls.dict_key)
-                    if inner is not None:
-                        clazz = inner.from_dict({cls.list_cls.dict_key: d})  # type: ignore
-                        value = clazz
-                    if key not in args:
-                        if inner is None:
-                            bc_script.logger.add_warning(
-                                f"`{key}` is not a valid key for `{cls.__name__}`! Valid keys are: `{args}`"
-                            )
-                    else:
-                        value = InputField(
-                            key, value, cls.__dataclass_fields__[key].type  # type: ignore
-                        ).value
-                        new_data_ls[key] = value
-                new_data_ls.append(value)  # type: ignore
+                inner = inner_classes.get(cls.list_cls.dict_key)
+                if inner is not None:
+                    clazz = inner.from_dict({cls.list_cls.dict_key: d})  # type: ignore
+                    value = clazz
+                else:
+                    for key, value in d.items():  # type: ignore
+                        if key not in args:
+                            if inner is None:
+                                bc_script.logger.add_warning(
+                                    f"`{key}` is not a valid key for `{cls.__name__}`! Valid keys are: `{args}`"
+                                )
+                        else:
+                            value = InputField(
+                                key, value, cls.__dataclass_fields__[key].type  # type: ignore
+                            ).value
+                            d[key] = value
+                    value = cls.list_cls(**d)  # type: ignore
+                new_data_ls.append(value)
 
             kwargs = {cls.dict_key: new_data_ls}
 
@@ -153,37 +155,91 @@ class BaseParser:
 
 
 class InputField:
-    def __init__(self, name: str, value: Any, type: str):
+    def __init__(self, name: str, value: Any, type_str: str):
         self.name = name
 
-        if value == "__input__":
-            typ = [t.strip() for t in type.split("|")]
-            if "int" in typ:
-                ty = int
-            elif "str" in typ:
-                ty = str
-            else:
-                raise ValueError(f"Unsupported type: {type}")
+        if isinstance(value, dict):
+            for key, val in value.copy().items():
+                key2 = key
+                if str(key).startswith("__input__"):
+                    key2 = self.gather_input(name, type(key).__name__, "", str(key))
+                val2 = val
+                if str(val).startswith("__input__"):
+                    val2 = self.gather_input(name, type(val).__name__, "", str(val))
+                del value[key]
+                value[key2] = val2
 
-            can_be_none = "None" in typ
-
-            input_str = f"Enter a value for {name}"
-            if can_be_none:
-                input_str += " (press enter to skip)"
-            val = input(input_str + ":")
-            value = None
-            if val or not can_be_none:
-                try:
-                    value = ty(val)
-                except ValueError:
-                    value = None
-                    bc_script.logger.add_error(
-                        f"Invalid input for type: `{type}` for `{name}`"
+        if isinstance(value, list):
+            for i, val in enumerate(value):
+                if str(val).startswith("__input__"):
+                    vals = self.gather_input(
+                        name, type(value).__name__, type(val).__name__, str(val)
                     )
+                    if isinstance(vals, list):
+                        value[i : len(vals)] = vals
+                    else:
+                        value[i] = val
+
+        if str(value).startswith("__input__"):
+            value = self.gather_input(name, type_str, "", str(value))
 
         self.value = value
 
-        self.type = type
+        self.type = type_str
+
+    def get_input_prompt(
+        self,
+        name: str,
+        type_str: str,
+        sub_type: str,
+        key: str,
+    ) -> tuple[str, Any, bool]:
+        if key and key != "__input__":
+            key = key.strip()[10:-1]
+        else:
+            key = ""
+
+        typ = [t.strip() for t in type_str.split("|")]
+        ty: Callable[[str], Any] = str
+
+        if "int" in typ:
+            ty = int
+        elif "str" in typ:
+            ty = str
+        elif "list" in typ:
+            if "int" in sub_type:
+                ty = lambda x: [int(i) for i in x.split(",")]
+            elif "str" in sub_type:
+                ty = lambda x: [i for i in x.split(",")]
+
+        else:
+            raise ValueError(f"Unsupported type: {type_str}")
+
+        can_be_none = "None" in typ
+
+        input_str = f"Enter a value for {name}"
+        if key:
+            input_str += f" ({key})"
+        if can_be_none:
+            input_str += " (press enter to skip)"
+        return input_str + ":", ty, can_be_none
+
+    def gather_input(self, name: str, type_str: str, sub_type: str, key: str) -> Any:
+        input_str, ty, can_be_none = self.get_input_prompt(
+            name, type_str, sub_type, key
+        )
+        val = input(input_str)
+        value = None
+        if val or not can_be_none:
+            try:
+                value = ty(val)
+            except ValueError:
+                value = None
+                bc_script.logger.add_error(
+                    f"Invalid input for type: `{type_str}` for `{name}`"
+                )
+
+        return value
 
 
 C = TypeVar("C", bound=BaseParser)
