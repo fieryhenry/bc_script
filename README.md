@@ -163,7 +163,6 @@ rerun = true # whether to rerun the game after saving
 
 most of these are features in bcsfe that need to be added to bc_script
 
-- Talents
 - Special skills
 - Init empty save
 - Convert save versions
