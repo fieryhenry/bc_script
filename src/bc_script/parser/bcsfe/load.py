@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 
-from bcsfe.core import CountryCode, GameVersion, Path, SaveFile, ServerHandler
+from bcsfe.core import CountryCode, GameVersion, Path, SaveFile, ServerHandler, JsonFile
 
 import bc_script
 from bc_script.parser.parse import BaseParser
@@ -19,6 +19,7 @@ class Load(BaseParser):
     file: File | None = None
     transfer: Transfer | None = None
     adb: Adb | None = None
+    json: Json | None = None
 
     def load(self) -> SaveFile | None:
         bc_script.logger.add_info(f"Loading save file")
@@ -28,6 +29,8 @@ class Load(BaseParser):
             return self.transfer.load()
         if self.adb is not None:
             return self.adb.load()
+        if self.json is not None:
+            return self.json.load()
         return None
 
     def get_cc(self) -> CountryCode | None:
@@ -113,4 +116,30 @@ class Load(BaseParser):
 
             bc_script.logger.add_info("Save file pulled from device")
 
+            return save_file
+
+    @dataclasses.dataclass
+    class Json(BaseParser):
+        dict_key: str = "json"
+        path: str = dataclasses.field(kw_only=True)
+
+        def load(self) -> SaveFile | None:
+            load = bc_script.ctx.load
+            if load is None:
+                return None
+            save_path = load.get_path()
+
+            json_path = Path(self.path)
+            if not json_path.exists():
+                bc_script.logger.add_error(f"Json file not found: {json_path}")
+                return None
+
+            json = JsonFile.from_path(json_path)
+
+            save_file = SaveFile.from_dict(json.to_object())
+            if save_path is not None:
+                save_file.save_path = save_path
+                save_file.to_file(save_path)
+
+            bc_script.logger.add_info(f"Loaded save file from json: {json_path}")
             return save_file

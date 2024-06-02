@@ -75,6 +75,11 @@ package_name = "jp.co.ponos.battlecatsen" # the package name of the game if mult
 transfer_code = "abcdef012" # the transfer code to load from
 confirmation_code = "01234" # the confirmation code to load from
 
+[load.json] # specify the options to enable loading from a json file (optional)
+path = "path/to/json/file" # the path to the json file to load from
+# if path is specified at the top level load table, the save data will be saved to the specified path after loading
+
+
 [edit] # specify the main save data edit options (optional)
 managed_items = ["catfood", "rareticket", "platinumticket", "legendticket"] # the items to send to the game servers to prevent bans, defaults to the above if not specified
 forced_locale = "en" # the locale to force the editor to use, valid options are "en", "jp", "kr", "tw" (optional)
@@ -173,6 +178,8 @@ rerun = true # whether to rerun the game after saving
 
 [save.transfer] # specify the options to enable saving to a transfer code (optional)
 
+[save.json] # specify the options to enable saving to a json file (optional)
+path = "path/to/json/file" # the path to the json file to save to
 ```
 
 ## TODO
@@ -181,7 +188,6 @@ most of these are features in bcsfe that need to be added to bc_script
 
 - Init empty save
 - Convert save versions
-- Load and save to json
 - Add scheme items
 - Add labyrinth medals
 - All level stuff

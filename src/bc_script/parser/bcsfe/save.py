@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 
-from bcsfe.core import BackupMetaData, Path, SaveFile, ServerHandler
+from bcsfe.core import BackupMetaData, Path, SaveFile, ServerHandler, JsonFile
 
 import bc_script
 from bc_script.parser.parse import BaseParser
@@ -18,6 +18,7 @@ class Save(BaseParser):
     file: File | None = None
     transfer: Transfer | None = None
     adb: Adb | None = None
+    json: Json | None = None
 
     def save(self, s: SaveFile):
         bc_script.logger.add_info("Saving save file")
@@ -28,6 +29,8 @@ class Save(BaseParser):
             self.transfer.save(s)
         if self.adb is not None:
             self.adb.save(s)
+        if self.json is not None:
+            self.json.save(s)
 
     def check_managed_items(self, s: SaveFile):
         if not self.upload_managed_items:
@@ -125,3 +128,26 @@ class Save(BaseParser):
                 bc_script.logger.add_info("Rerunning game")
                 adb_handler.rerun_game()
                 bc_script.logger.add_info("Game rerun")
+
+    @dataclasses.dataclass
+    class Json(BaseParser):
+        dict_key: str = "json"
+        path: str | None = None
+
+        def save(self, s: SaveFile):
+            sv = bc_script.ctx.save
+            if sv is None:
+                return
+            path = self.path
+            if path is None:
+                path = sv.get_path()
+            else:
+                path = Path(path)
+            if path is None:
+                return
+
+            bc_script.logger.add_info(f"Saving to: {path}")
+
+            json_data = s.to_dict()
+            json = JsonFile.from_object(json_data)
+            json.to_file(path)
